@@ -5,4 +5,4 @@
 Dart 2.3.0
 Flutter 1.5.4
 
-![image](gif/Flutter.gif)
+![image](gif/flutter.gif)
