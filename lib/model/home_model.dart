@@ -257,7 +257,7 @@ class User {
 
   User.fromJson(Map<String, dynamic> json) {
     medium = json['medium'];
-    thumb = json['thumb'];
+    thumb = json['thumb'];// == null?'http://img0.imgtn.bdimg.com/it/u=3877638566,3629419472&fm=26&gp=0.jpg':json['thumb'];
     gender = json['gender'];
     age = json['age'];
     role = json['role'];

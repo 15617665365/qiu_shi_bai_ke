@@ -6,21 +6,25 @@ import 'pages/index_page.dart';
 import 'routers/application.dart';
 import 'provides/currentIndex.dart';
 import 'provides/home_content_provide.dart';
+import 'provides/current_video_provide.dart';
 
 import 'package:fluro/fluro.dart';
 
-
 void main() {
   var currentIndexProvide = CurrentIndexProvide();
+  var currentVideoProvide = CurrentVideoProvide();
   var homeContentProvide = HomeContentProvide();
 
   var provide = Providers();
-  provide..provide(Provider.value(currentIndexProvide))
-         ..provide(Provider.value(homeContentProvide));
+  provide
+    ..provide(Provider.value(currentIndexProvide))
+    ..provide(Provider.value(currentVideoProvide))
+    ..provide(Provider.value(homeContentProvide));
 
   runApp(ProviderNode(child: MyApp(), providers: provide));
 
-  SystemUiOverlayStyle systemUiOverlayStyle = SystemUiOverlayStyle(statusBarColor:Colors.transparent);
+  SystemUiOverlayStyle systemUiOverlayStyle =
+      SystemUiOverlayStyle(statusBarColor: Colors.transparent);
   SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
 }
 
@@ -38,7 +42,6 @@ class MyApp extends StatelessWidget {
         onGenerateRoute: Application.router.generator,
         theme: ThemeData(primaryColor: Colors.orange),
         home: IndexPage(),
-
       ),
     );
   }

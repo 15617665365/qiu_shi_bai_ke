@@ -9,6 +9,8 @@ import 'package:video_player/video_player.dart';
 import 'ijkplayer_page.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:flutter_ijkplayer/flutter_ijkplayer.dart';
+import 'package:qiu_shi_bai_ke/provides/current_video_provide.dart';
+import 'package:provide/provide.dart';
 
 class HomeContentItemPage extends StatefulWidget {
   final Items model;
@@ -55,6 +57,8 @@ class HomeContentItemPageState extends State<HomeContentItemPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+//    Provide.value<CurrentVideoProvide>(context)
+//        .changeIndex(model.id, _isPlaying);
   }
 
   List<Widget> groupWidget() {
@@ -67,7 +71,7 @@ class HomeContentItemPageState extends State<HomeContentItemPage> {
       list.add(txtContent());
       list.add(videoContent());
     } else if (model.format == 'word') {
-      list.add(userInfo());
+      model.user !=null?list.add(userInfo()):Container();
       list.add(txtContent());
     } else if (model.format == 'multi') {
       list.add(userInfo());
@@ -121,7 +125,7 @@ class HomeContentItemPageState extends State<HomeContentItemPage> {
             child: FadeInImage.assetNetwork(
                 width: ScreenUtil().setWidth(110),
                 placeholder: 'images/qbf_sign_shit_empty@3x.png',
-                image: (model.user.thumb == null)
+                image: (model.user.thumb.length == 0)
                     ? 'https://static.pgyer.com/static-20190512/images/newHome/data_statis.png'
                     : model.user.thumb),
           ),
@@ -231,29 +235,46 @@ class HomeContentItemPageState extends State<HomeContentItemPage> {
 
             Center(
                 child: GestureDetector(
-                  onTap: () {
-                    _isPlaying = !_isPlaying;
-                    if (_isPlaying) {
+                    onTap: () {
+                      _isPlaying = !_isPlaying;
+                      if (_isPlaying) {
 //                  controller.pauseOtherController();
-                      controller.ijkStatus == IjkStatus.noDatasource
-                          ? initPlayer(controller)
-                          : controller.play();
-                      setState(() {});
-                    } else {
-                      controller.pause();
-                    }
-                  },
-                  child: _isPlaying
-                      ? Container(width: 0, height: 0)
-                      : FadeInImage.memoryNetwork(
-                    width: ScreenUtil().setWidth(1020),
-                    height: ScreenUtil().setWidth(1020) * 486 / 864,
-                    placeholder: kTransparentImage,
-                    image: model.picUrl,
-                    fit: BoxFit.fitHeight,
-                  ),
-                )
-            )
+                        controller.ijkStatus == IjkStatus.noDatasource
+                            ? initPlayer(controller)
+                            : controller.play();
+                        setState(() {});
+                      } else {
+                        controller.pause();
+                      }
+                      Provide.value<CurrentVideoProvide>(context)
+                          .changeIndex(model.id, _isPlaying);
+                    },
+//                    child: _isPlaying
+//                        ? Container(width: 0, height: 0)
+//                        : FadeInImage.memoryNetwork(
+//                            width: ScreenUtil().setWidth(1020),
+//                            height: ScreenUtil().setWidth(1020) * 486 / 864,
+//                            placeholder: kTransparentImage,
+//                            image: model.picUrl,
+//                            fit: BoxFit.fitHeight,
+//                          ),
+                    child: Provide<CurrentVideoProvide>(
+                        builder: (context, child, val) {
+                      if ((val.currentVideo == model.id)) {
+                        val.isPlayer ? controller.play() : controller.pause();
+                        return Container(width: 0, height: 0);
+                      } else {
+                        controller.stop();
+                        return FadeInImage.memoryNetwork(
+                          width: ScreenUtil().setWidth(1020),
+                          height: ScreenUtil().setWidth(1020) * 486 / 864,
+                          placeholder: kTransparentImage,
+                          image: model.picUrl,
+                          fit: BoxFit.fitHeight,
+                        );
+                      }
+                    })
+                ))
           ],
         ),
         borderRadius: BorderRadius.circular(5),
@@ -273,13 +294,12 @@ class HomeContentItemPageState extends State<HomeContentItemPage> {
 
   Widget multiContent() {
     print(
-        '-------------------${model.attachments[0].highUrl}-------${model
-            .attachments.length}---------------');
+        '-------------------${model.attachments[0].highUrl}-------${model.attachments.length}---------------');
     return Container(
       margin: EdgeInsets.all(20),
       width: ScreenUtil().setWidth(1060),
       height: (model.attachments.length / 3 +
-          (model.attachments.length % 3 == 0 ? 0 : 1)) *
+              (model.attachments.length % 3 == 0 ? 0 : 1)) *
           ScreenUtil().setHeight(1060) /
           3,
       child: GridView.builder(
@@ -287,9 +307,9 @@ class HomeContentItemPageState extends State<HomeContentItemPage> {
           physics: NeverScrollableScrollPhysics(),
           itemCount: model.attachments.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            //横轴元素个数
+              //横轴元素个数
               crossAxisCount:
-              model.attachments.length >= 3 ? 3 : model.attachments.length,
+                  model.attachments.length >= 3 ? 3 : model.attachments.length,
               //纵轴间距
               mainAxisSpacing: 2.0,
               //横轴间距
@@ -302,13 +322,13 @@ class HomeContentItemPageState extends State<HomeContentItemPage> {
               child: model.attachments[index].format == 'gif'
                   ? Image.asset('images/qbf_sign_shit_empty@3x.png')
                   : FadeInImage.assetNetwork(
-                placeholder: 'images/qbf_sign_shit_empty@3x.png',
-                image: 'http:${model.attachments[index].highUrl}',
-                fit: BoxFit.cover,
-                width: model.attachments.length >= 3
-                    ? 3.0
-                    : model.attachments.length.toDouble(),
-              ),
+                      placeholder: 'images/qbf_sign_shit_empty@3x.png',
+                      image: 'http:${model.attachments[index].highUrl}',
+                      fit: BoxFit.cover,
+                      width: model.attachments.length >= 3
+                          ? 3.0
+                          : model.attachments.length.toDouble(),
+                    ),
             );
           }),
     );
@@ -339,10 +359,7 @@ class HomeContentItemPageState extends State<HomeContentItemPage> {
                   },
                 ),
                 Text(
-                    '${isImmense
-                        ? model.votes.up - model.votes.down + 1
-                        : isPain ? model.votes.up - model.votes.down - 1 : model
-                        .votes.up - model.votes.down}',
+                    '${isImmense ? model.votes.up - model.votes.down + 1 : isPain ? model.votes.up - model.votes.down - 1 : model.votes.up - model.votes.down}',
                     style: TextStyle(color: Colors.black54)),
                 InkWell(
                   child: Image.asset(isPain
@@ -402,10 +419,10 @@ class HomeContentItemPageState extends State<HomeContentItemPage> {
                 text: '${model.hotComment.user.login}:',
                 style: TextStyle(color: Colors.black54),
                 children: <TextSpan>[
-                  TextSpan(
-                    text: '${model.hotComment.content}',
-                    style: TextStyle(color: Colors.black),
-                  )
-                ])));
+              TextSpan(
+                text: '${model.hotComment.content}',
+                style: TextStyle(color: Colors.black),
+              )
+            ])));
   }
 }
